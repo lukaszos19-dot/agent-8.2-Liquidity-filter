@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Agent v8.1 - Bestial Hunter (Liquidity Sweep Edition)</title>
+
+<style>
+*{box-sizing:border-box}
+
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    min-height:100%;
+}
+
+body{
+    padding:10px;
+    background:#0b0d12;
+    color:#e5e7eb;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+.header{
+    text-align:center;
+    margin:4px 0 14px;
+}
+
+.header h1{
+    margin:0;
+    color:#818cf8;
+    font-size:20px;
+    letter-spacing:1px;
+}
+
+.header p{
+    margin:3px 0 0;
+    color:#737b8c;
+    font-size:10px;
+}
+
+.tabs{
+    display:flex;
+    gap:6px;
+    justify-content:center;
+    margin-bottom:12px;
+}
+
+.tab{
+    flex:1;
+    max-width:150px;
+    padding:11px 5px;
+    text-align:center;
+    background:#252836;
+    color:#9ca3af;
+    border-radius:9px;
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.tab.active{
+    background:#818cf8;
+    color:#fff;
+}
+
+.tab-content{
+    display:none;
+    grid-template-columns:repeat(auto-fit,minmax(290px,410px));
+    justify-content:center;
+    gap:10px;
+}
+
+.tab-content.active{
+    display:grid;
+}
+
+.box{
+    width:100%;
+    padding:12px;
+    background:#1a1c28;
+    border:1px solid #2d2f3e;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+
+h3{
+    margin:2px 0 10px;
+    text-align:center;
+    color:#818cf8;
+    font-size:15px;
+    letter-spacing:1px;
+}
+
+.mini-dash{
+    display:flex;
+    gap:6px;
+    margin-bottom:9px;
+}
+
+.mini-col{
+    flex:1;
+    min-height:58px;
+    padding:8px 3px;
+    background:rgba(255,255,255,.045);
+    border:1px solid transparent;
+    border-radius:9px;
+    text-align:center;
+    cursor:pointer;
+}
+
+.mini-col.active{
+    background:rgba(129,140,248,.18);
+    border-color:#818cf8;
+}
+
+.mini-col h4{
+    margin:0;
+    color:#9ca3af;
+    font-size:8px;
+    text-transform:uppercase;
+}
+
+.mini-status{
+    margin-top:5px;
+    font-size:11px;
+    font-weight:800;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.beast-icon{
+    font-size:17px;
+    line-height:17px;
+}
+
+.buy{
+    color:#22c55e;
+}
+
+.sell{
+    color:#ef4444;
+}
+
+.wait{
+    color:#9ca3af;
+}
+
+.loading{
+    color:#fbbf24;
+}
+
+.error{
+    color:#ef4444;
+    font-size:9px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-bottom:6px;
+    border:0;
+    border-radius:8px;
+    background:#818cf8;
+    color:#fff;
+    font-weight:800;
+    font-size:13px;
+    cursor:pointer;
+}
+
+button:disabled{
+    opacity:.55;
+    cursor:wait;
+}
+
+.status{
+    min-height:15px;
+    text-align:center;
+    color:#6b7280;
+    font-size:10px;
+}
+
+.info-panel{
+    display:none;
+    margin-top:5px;
+    padding:10px 12px;
+    background:rgba(0,0,0,.22);
+    border-radius:10px;
+    font-size:12px;
+}
+
+.info-panel.active{
+    display:block;
+}
+
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    padding:6px 0;
+    border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.info-row:last-child{
+    border:0;
+}
+
+.label{
+    color:#9ca3af;
+}
+
+.val{
+    color:#fff;
+    font-weight:800;
+    text-align:right;
+}
+
+.signal-buy{
+    color:#22c55e;
+}
+
+.signal-sell{
+    color:#ef4444;
+}
+
+.signal-wait{
+    color:#9ca3af;
+}
+
+.sweep-tag{
+    background:#3b82f6;
+    color:#fff;
+    font-size:9px;
+    padding:2px 6px;
+    border-radius:4px;
+    margin-left:4px;
+    vertical-align:middle;
+}
+
+.conf-high{
+    color:#22c55e;
+}
+
+.conf-medium{
+    color:#fbbf24;
+}
+
+.conf-low{
+    color:#9ca3af;
+}
+
+canvas{
+    display:none;
+    width:100%;
+    height:210px;
+    margin-top:8px;
+    background:#050505;
+    border-radius:8px;
+}
+
+canvas.active{
+    display:block;
+}
+
+.disclaimer{
+    max-width:700px;
+    margin:12px auto 3px;
+    color:#596170;
+    font-size:8px;
+    line-height:1.4;
+    text-align:center;
+}
+
+@media(max-width:600px){
+
+    body{
+        padding:7px;
+    }
+
+    .header h1{
+        font-size:18px;
+    }
+
+    .tab-content.active{
+        display:block;
+    }
+
+    .box{
+        margin-bottom:10px;
+        padding:10px;
+    }
+
+    .tab{
+        font-size:11px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>🐾 BESTIAL HUNTER</h1>
+    <p>Multi-Timeframe Market Analyzer v8.1 + Liquidity Filter</p>
+</div>
+
+<div class="tabs">
+    <div class="tab active" data-tab="fx">Forex</div>
+    <div class="tab" data-tab="commodities">Commodities</div>
+    <div class="tab" data-tab="crypto">Crypto</div>
+</div>
+
+<div id="fx" class="tab-content active"></div>
+<div id="commodities" class="tab-content"></div>
+<div id="crypto" class="tab-content"></div>
+
+<div class="disclaimer">
+    Sygnały mają charakter informacyjny i nie stanowią gwarancji zysku ani porady inwestycyjnej.
+</div>
+
+<script>
+"use strict";
+
+/* ==========================================================
+   BESTIAL HUNTER v8.1
+
+   Silnik:
+   - EMA 9 / 21 / 50
+   - RSI
+   - MACD
+   - ATR
+   - Momentum
+   - Dywergencja
+   - Liquidity Sweep Filter
+   - Multi-Timeframe
+   - BUY / SELL / WAIT
+   - SL / TP na podstawie ATR
+========================================================== */
+
+const TWELVE_API_KEY = "56019b818e414819ae637fc111228e3b";
+
+const instruments = {
+
+    fx:[
+        ["EUR/USD","EURUSD","EUR/USD"],
+        ["USD/JPY","USDJPY","USD/JPY"],
+        ["EUR/JPY","EURJPY","EUR/JPY"],
+        ["GBP/USD","GBPUSD","GBP/USD"]
+    ],
+
+    commodities:[
+        ["GOLD","XAUUSD","XAU/USD"],
+        ["OIL","WTI","WTI"],
+        ["NATGAS","GAS","NATGAS"],
+        ["COFFEE","COFFEE","COFFEE"],
+        ["CORN","CORN","CORN"]
+    ],
+
+    crypto:[
+        ["Bitcoin","BTC","BTC/USD"],
+        ["Ethereum","ETH","ETH/USD"]
+    ]
+};
+
+const timeframes = [
+    ["5min","m5"],
+    ["15min","m15"],
+    ["1h","h1"]
+];
+
+const marketData = {};
+const busy = {};
+
+/* ==========================================================
+   FUNKCJE POMOCNICZE
+========================================================== */
+
+function avg(array){
+    if(!array || !array.length){
+        return 0;
+    }
+    return array.reduce((sum, value) => sum + value, 0) / array.length;
+}
+
+function precision(price){
+    if(price >= 1000) return 2;
+    if(price >= 100) return 3;
+    if(price >= 10) return 4;
+    return 5;
+}
+
+function sleep(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/* ==========================================================
+   EMA
+========================================================== */
+
+function ema(array, period){
+    if(!array || array.length < period){
+        return null;
+    }
+
+    let value = avg(array.slice(0, period));
+    const multiplier = 2 / (period + 1);
+
+    for(let i = period; i < array.length; i++){
+        value = (array[i] * multiplier) + (value * (1 - multiplier));
+    }
+
+    return value;
+}
+
+/* ==========================================================
+   RSI
+========================================================== */
+
+function rsi(array, period){
+    if(!array || array.length <= period){
+        return 50;
+    }
+
+    let gain = 0;
+    let loss = 0;
+
+    for(let i = 1; i <= period; i++){
+        const difference = array[i] - array[i-1];
+        if(difference > 0){
+            gain += difference;
+        }else{
+            loss -= difference;
+        }
+    }
+
+    let averageGain = gain / period;
+    let averageLoss = loss / period;
+
+    for(let i = period + 1; i < array.length; i++){
+        const difference = array[i] - array[i-1];
+        const currentGain = difference > 0 ? difference : 0;
+        const currentLoss = difference < 0 ? -difference : 0;
+
+        averageGain = (averageGain * (period - 1) + currentGain) / period;
+        averageLoss = (averageLoss * (period - 1) + currentLoss) / period;
+    }
+
+    if(averageLoss === 0){
+        return averageGain > 0 ? 100 : 50;
+    }
+
+    const relativeStrength = averageGain / averageLoss;
+    return 100 - (100 / (1 + relativeStrength));
+}
+
+/* ==========================================================
+   MACD
+========================================================== */
+
+function macd(array){
+    const ema12 = ema(array, 12);
+    const ema26 = ema(array, 26);
+
+    if(ema12 === null || ema26 === null){
+        return { line: 0, signal: 0, hist: 0 };
+    }
+
+    const series = [];
+
+    for(let i = 26; i <= array.length; i++){
+        const part = array.slice(0, i);
+        const fast = ema(part, 12);
+        const slow = ema(part, 26);
+
+        if(fast !== null && slow !== null){
+            series.push(fast - slow);
+        }
+    }
+
+    const line = ema12 - ema26;
+    const signal = series.length >= 9 ? ema(series, 9) : line;
+
+    return {
+        line: line,
+        signal: signal,
+        hist: line - signal
+    };
+}
+
+/* ==========================================================
+   ATR
+========================================================== */
+
+function atr(highs, lows, closes, period){
+    if(!closes || closes.length < period + 1){
+        return 0;
+    }
+
+    const trueRanges = [];
+
+    for(let i = 1; i < closes.length; i++){
+        const trueRange = Math.max(
+            highs[i] - lows[i],
+            Math.abs(highs[i] - closes[i-1]),
+            Math.abs(lows[i] - closes[i-1])
+        );
+        trueRanges.push(trueRange);
+    }
+
+    return avg(trueRanges.slice(-period));
+}
+
+/* ==========================================================
+   DYWERGENCJA
+========================================================== */
+
+function divergence(closes){
+    if(!closes || closes.length < 40){
+        return null;
+    }
+
+    const oldPrices = closes.slice(-30, -20);
+    const recentPrices = closes.slice(-10);
+
+    const oldPrice = avg(oldPrices);
+    const recentPrice = avg(recentPrices);
+
+    const oldRsi = rsi(closes.slice(-40, -10), 14);
+    const recentRsi = rsi(closes.slice(-20), 14);
+
+    if(recentPrice < oldPrice && recentRsi > oldRsi + 3){
+        return "bull";
+    }
+
+    if(recentPrice > oldPrice && recentRsi < oldRsi - 3){
+        return "bear";
+    }
+
+    return null;
+}
+
+/* ==========================================================
+   LIQUIDITY SWEEP FILTER
+========================================================== */
+
+function checkLiquiditySweep(closes, highs, lows, period = 20){
+    if(!closes || closes.length < period + 2) return null;
+
+    const currentClose = closes[closes.length - 1];
+    const currentHigh = highs[highs.length - 1];
+    const currentLow = lows[lows.length - 1];
+
+    const pastHighs = highs.slice(-period - 1, -1);
+    const pastLows = lows.slice(-period - 1, -1);
+
+    const highestLevel = Math.max(...pastHighs);
+    const lowestLevel = Math.min(...pastLows);
+
+    if(currentHigh > highestLevel && currentClose < highestLevel){
+        return "BEARISH_SWEEP";
+    }
+
+    if(currentLow < lowestLevel && currentClose > lowestLevel){
+        return "BULLISH_SWEEP";
+    }
+
+    return null;
+}
+
+/* ==========================================================
+   ANALIZA JEDNEGO TIMEFRAME
+========================================================== */
+
+function analyze(closes, highs, lows){
+    const price = closes[closes.length - 1];
+    const ema9 = ema(closes, 9);
+    const ema21 = ema(closes, 21);
+    const ema50 = ema(closes, 50);
+
+    const currentRsi = rsi(closes, 14);
+    const currentMacd = macd(closes);
+    const currentAtr = atr(highs, lows, closes, 14);
+
+    const average20 = avg(closes.slice(-20));
+    const average50 = avg(closes.slice(-50));
+
+    const momentum5 = closes.length > 5
+        ? ((price - closes[closes.length - 6]) / closes[closes.length - 6]) * 100
+        : 0;
+
+    const momentum10 = closes.length > 10
+        ? ((price - closes[closes.length - 11]) / closes[closes.length - 11]) * 100
+        : 0;
+
+    const div = divergence(closes);
+    const sweep = checkLiquiditySweep(closes, highs, lows, 20);
+
+    let buy = 0;
+    let sell = 0;
+
+    /* TREND */
+    if(ema9 !== null && ema21 !== null){
+        if(ema9 > ema21) buy += 2;
+        if(ema9 < ema21) sell += 2;
+    }
+
+    if(ema21 !== null && ema50 !== null){
+        if(ema21 > ema50) buy += 2;
+        if(ema21 < ema50) sell += 2;
+    }
+
+    /* ŚREDNIE */
+    if(price > average20) buy++;
+    if(price < average20) sell++;
+
+    if(price > average50) buy++;
+    if(price < average50) sell++;
+
+    /* RSI */
+    if(currentRsi >= 52 && currentRsi <= 68){
+        buy += 2;
+    }else if(currentRsi >= 32 && currentRsi <= 48){
+        sell += 2;
+    }else if(currentRsi > 72){
+        sell++;
+    }else if(currentRsi < 28){
+        buy++;
+    }
+
+    /* MACD */
+    if(currentMacd.hist > 0) buy += 2;
+    if(currentMacd.hist < 0) sell += 2;
+
+    /* MOMENTUM */
+    if(momentum5 > 0 && momentum10 > 0) buy += 2;
+    if(momentum5 < 0 && momentum10 < 0) sell += 2;
+
+    /* DYWERSJA */
+    if(div === "bull") buy += 3;
+    if(div === "bear") sell += 3;
+
+    /* CENA WZGLĘDEM EMA9 */
+    if(ema9 !== null){
+        if(price > ema9) buy++;
+        if(price < ema9) sell++;
+    }
+
+    /* LIQUIDITY SWEEP IMPULS */
+    if(sweep === "BEARISH_SWEEP"){
+        sell += 8;
+        buy = 0;
+    } else if(sweep === "BULLISH_SWEEP"){
+        buy += 8;
+        sell = 0;
+    }
+
+    let signal = "WAIT";
+    const difference = Math.abs(buy - sell);
+    const total = buy + sell;
+
+    if(buy >= sell + 3){
+        signal = "BUY";
+    }
+
+    if(sell >= buy + 3){
+        signal = "SELL";
+    }
+
+    let confidence = 50;
+
+    if(total > 0){
+        confidence = Math.round(50 + (difference / total) * 50);
+    }
+
+    confidence = Math.max(50, Math.min(95, confidence));
+
+    let cls = "wait";
+    if(signal === "BUY") cls = "buy";
+    if(signal === "SELL") cls = "sell";
+
+    return {
+        c: closes,
+        h: highs,
+        l: lows,
+        price: price,
+        e9: ema9,
+        e21: ema21,
+        e50: ema50,
+        rsi: currentRsi,
+        macd: currentMacd,
+        atr: currentAtr,
+        avg20: average20,
+        avg50: average50,
+        div: div,
+        sweep: sweep,
+        buy: buy,
+        sell: sell,
+        signal: signal,
+        cls: cls,
+        confidence: confidence
+    };
+}
+
+/* ==========================================================
+   INTERFEJS
+========================================================== */
+
+function buildInterface(){
+    Object.keys(instruments).forEach(function(category){
+        const container = document.getElementById(category);
+
+        instruments[category].forEach(function(item){
+            const name = item[0];
+            const id = item[1];
+            const symbol = item[2];
+
+            container.insertAdjacentHTML(
+                "beforeend",
+                `
+                <div class="box" id="box_${id}">
+                    <h3>${name}</h3>
+                    <div class="mini-dash">
+                        <div class="mini-col" id="col${id}5min" data-id="${id}" data-tf="5min">
+                            <h4>Scalp</h4>
+                            <div class="mini-status" id="m5_${id}">--</div>
+                        </div>
+                        <div class="mini-col" id="col${id}15min" data-id="${id}" data-tf="15min">
+                            <h4>Day</h4>
+                            <div class="mini-status" id="m15_${id}">--</div>
+                        </div>
+                        <div class="mini-col" id="col${id}1h" data-id="${id}" data-tf="1h">
+                            <h4>Long</h4>
+                            <div class="mini-status" id="h1_${id}">--</div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="analyze-button" id="btn_${id}" data-id="${id}" data-symbol="${symbol}">
+                        ANALIZUJ BESTIĘ
+                    </button>
+
+                    <div class="status" id="status_${id}"></div>
+
+                    <div class="info-panel" id="panel_${id}">
+                        <div class="info-row">
+                            <span class="label">Aktualna Cena:</span>
+                            <span class="val" id="price_${id}">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Wejście (Limit):</span>
+                            <span class="val" id="entry_${id}" style="color:#818cf8">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Sygnał:</span>
+                            <span class="val" id="divinfo${id}">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Stop Loss:</span>
+                            <span class="val" id="sl_${id}" style="color:#ef4444">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Take Profit:</span>
+                            <span class="val" id="tp_${id}" style="color:#22c55e">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Pewność analizy:</span>
+                            <span class="val" id="confidence_${id}">--</span>
+                        </div>
+                    </div>
+
+                    <canvas id="chart_${id}" width="390" height="210"></canvas>
+                </div>
+                `
+            );
+        });
+    });
+}
+
+/* ==========================================================
+   POBIERANIE DANYCH
+========================================================== */
+
+async function fetchData(symbol, id){
+    if(busy[id]) return;
+    busy[id] = true;
+
+    const button = document.getElementById("btn_" + id);
+    const status = document.getElementById("status_" + id);
+
+    button.disabled = true;
+    button.innerText = "ANALIZUJĘ...";
+    status.innerText = "Pobieranie danych...";
+
+    marketData[id] = {};
+
+    try{
+        for(const frame of timeframes){
+            const tf = frame[0];
+            const label = frame[1];
+            const mini = document.getElementById(label + "_" + id);
+
+            mini.innerHTML = "<span class='loading'>...</span>";
+
+            try{
+                const url = "https://api.twelvedata.com/time_series" +
+                    "?symbol=" + encodeURIComponent(symbol) +
+                    "&interval=" + encodeURIComponent(tf) +
+                    "&outputsize=120" +
+                    "&apikey=" + encodeURIComponent(TWELVE_API_KEY);
+
+                const response = await fetch(url);
+                if(!response.ok) throw new Error("HTTP " + response.status);
+
+                const data = await response.json();
+                if(data.status === "error") throw new Error(data.message || "Błąd API");
+                if(!Array.isArray(data.values)) throw new Error("Brak danych");
+
+                const values = data.values.slice().reverse();
+                const closes = [];
+                const highs = [];
+                const lows = [];
+
+                values.forEach(function(value){
+                    const close = Number(value.close);
+                    const high = Number(value.high);
+                    const low = Number(value.low);
+
+                    if(Number.isFinite(close) && Number.isFinite(high) && Number.isFinite(low)){
+                        closes.push(close);
+                        highs.push(high);
+                        lows.push(low);
+                    }
+                });
+
+                if(closes.length < 60) throw new Error("Za mało danych");
+
+                const result = analyze(closes, highs, lows);
+                marketData[id][tf] = result;
+
+                renderMini(id, tf, result);
+
+            }catch(error){
+                console.error(symbol, tf, error);
+                mini.innerHTML = "<span class='error'>BRAK</span>";
+            }
+
+            await sleep(250);
+        }
+
+        status.innerText = "Analiza zakończona.";
+
+        if(marketData[id]["15min"]){
+            updateUI(id, "15min");
+        }else if(marketData[id]["5min"]){
+            updateUI(id, "5min");
+        }else if(marketData[id]["1h"]){
+            updateUI(id, "1h");
+        }else{
+            status.innerText = "Nie udało się pobrać danych.";
+        }
+
+    }catch(error){
+        console.error(error);
+        status.innerText = "Błąd pobierania danych.";
+    }finally{
+        button.disabled = false;
+        button.innerText = "ANALIZUJ BESTIĘ";
+        busy[id] = false;
+    }
+}
+
+/* ==========================================================
+   MINI SYGNAŁY
+========================================================== */
+
+function renderMini(id, timeframe, data){
+    const map = {
+        "5min":"m5",
+        "15min":"m15",
+        "1h":"h1"
+    };
+
+    const element = document.getElementById(map[timeframe] + "_" + id);
+    if(!element) return;
+
+    let html = "";
+
+    if(data.signal === "BUY"){
+        html = "<span class='beast-icon'>🐂</span><span class='buy'>BUY</span>";
+    }else if(data.signal === "SELL"){
+        html = "<span class='beast-icon'>🐻</span><span class='sell'>SELL</span>";
+    }else{
+        html = "<span class='wait'>WAIT</span>";
+    }
+
+    element.innerHTML = html;
+}
+
+/* ==========================================================
+   AKTUALIZACJA PANELU
+========================================================== */
+
+function updateUI(id, timeframe){
+    const data = marketData[id] && marketData[id][timeframe];
+    if(!data) return;
+
+    document.querySelectorAll("#box_" + id + " .mini-col").forEach(function(element){
+        element.classList.remove("active");
+    });
+
+    const selected = document.getElementById("col" + id + timeframe);
+    if(selected) selected.classList.add("active");
+
+    document.getElementById("panel_" + id).classList.add("active");
+
+    const pricePrecision = precision(data.price);
+    document.getElementById("price_" + id).innerText = data.price.toFixed(pricePrecision);
+
+    /* WEJŚCIE */
+    let entry = data.price;
+    if((data.signal === "BUY" || data.signal === "SELL") && data.avg20){
+        entry = data.avg20;
+    }
+
+    /* SL / TP */
+    let sl = null;
+    let tp = null;
+
+    if(data.atr > 0){
+        if(data.signal === "BUY"){
+            sl = entry - data.atr * 1.8;
+            tp = entry + data.atr * 3.2;
+        }else if(data.signal === "SELL"){
+            sl = entry + data.atr * 1.8;
+            tp = entry - data.atr * 3.2;
+        }else{
+            sl = entry - data.atr * 1.8;
+            tp = entry + data.atr * 3.2;
+        }
+    }
+
+    document.getElementById("entry_" + id).innerText = entry.toFixed(pricePrecision);
+    document.getElementById("sl_" + id).innerText = sl !== null ? sl.toFixed(pricePrecision) : "--";
+    document.getElementById("tp_" + id).innerText = tp !== null ? tp.toFixed(pricePrecision) : "--";
+
+    /* SYGNAŁ & SWEEP TAG */
+    const signal = document.getElementById("divinfo" + id);
+    let sweepTag = data.sweep ? '<span class="sweep-tag">SWEEP</span>' : '';
+
+    if(data.signal === "BUY"){
+        signal.innerHTML = '<span class="signal-buy">🐂 BUY</span>' + sweepTag;
+    }else if(data.signal === "SELL"){
+        signal.innerHTML = '<span class="signal-sell">🐻 SELL</span>' + sweepTag;
+    }else{
+        signal.innerHTML = '<span class="signal-wait">WAIT</span>' + sweepTag;
+    }
+
+    /* PEWNOŚĆ */
+    const confidence = document.getElementById("confidence_" + id);
+    confidence.innerText = data.confidence + "%";
+    confidence.className = "val";
+
+    if(data.confidence >= 75){
+        confidence.classList.add("conf-high");
+    }else if(data.confidence >= 62){
+        confidence.classList.add("conf-medium");
+    }else{
+        confidence.classList.add("conf-low");
+    }
+
+    /* WYKRES */
+    const canvas = document.getElementById("chart_" + id);
+    canvas.classList.add("active");
+    drawChart(canvas, data);
+}
+
+/* ==========================================================
+   WYKRES
+========================================================== */
+
+function drawChart(canvas, data){
+    const ctx = canvas.getContext("2d");
+    if(!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const prices = data.c.slice(-60);
+    if(prices.length < 2) return;
+
+    const support = Math.min.apply(null, data.l.slice(-30));
+    const resistance = Math.max.apply(null, data.h.slice(-30));
+
+    const values = prices.concat([support, resistance]);
+    let maximum = Math.max.apply(null, values);
+    let minimum = Math.min.apply(null, values);
+
+    let range = maximum - minimum;
+    if(!Number.isFinite(range) || range <= 0) range = 1;
+
+    maximum += range * .12;
+    minimum -= range * .12;
+
+    const left = 5;
+    const top = 10;
+    const chartWidth = canvas.width * .76;
+    const chartHeight = 175;
+
+    function y(value){
+        return top + chartHeight - ((value - minimum) / (maximum - minimum)) * chartHeight;
+    }
+
+    /* TŁO */
+    ctx.fillStyle = "#050505";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    /* SIATKA */
+    ctx.strokeStyle = "rgba(255,255,255,.04)";
+    ctx.lineWidth = 1;
+
+    for(let i = 1; i < 5; i++){
+        const gridY = top + (chartHeight / 5) * i;
+        ctx.beginPath();
+        ctx.moveTo(left, gridY);
+        ctx.lineTo(chartWidth, gridY);
+        ctx.stroke();
+    }
+
+    /* OPÓR */
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(239,68,68,.45)";
+    ctx.beginPath();
+    ctx.moveTo(left, y(resistance));
+    ctx.lineTo(chartWidth, y(resistance));
+    ctx.stroke();
+
+    /* WSPARCIE */
+    ctx.strokeStyle = "rgba(34,197,94,.45)";
+    ctx.beginPath();
+    ctx.moveTo(left, y(support));
+    ctx.lineTo(chartWidth, y(support));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* CENA */
+    ctx.strokeStyle = "#818cf8";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+
+    prices.forEach(function(value, index){
+        const x = left + (index / (prices.length - 1)) * (chartWidth - left);
+        const yy = y(value);
+        if(index === 0){
+            ctx.moveTo(x, yy);
+        }else{
+            ctx.lineTo(x, yy);
+        }
+    });
+    ctx.stroke();
+
+    /* PUNKT CENY */
+    const lastY = y(data.price);
+    let color = "#9ca3af";
+    if(data.signal === "BUY") color = "#22c55e";
+    if(data.signal === "SELL") color = "#ef4444";
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(chartWidth, lastY, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* CENA TEXT */
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 11px Arial";
+    ctx.fillText(data.price.toFixed(precision(data.price)), chartWidth + 6, lastY + 4);
+
+    /* SUPPORT / RESISTANCE TEXT */
+    ctx.font = "10px Arial";
+    ctx.fillStyle = "#ef4444";
+    ctx.fillText("RES", chartWidth + 6, y(resistance) + 3);
+
+    ctx.fillStyle = "#22c55e";
+    ctx.fillText("SUP", chartWidth + 6, y(support) + 3);
+}
+
+/* ==========================================================
+   TABY
+========================================================== */
+
+function setupTabs(){
+    document.querySelectorAll(".tab").forEach(function(tab){
+        tab.addEventListener("click", function(){
+            document.querySelectorAll(".tab").forEach(item => item.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(item => item.classList.remove("active"));
+
+            tab.classList.add("active");
+            const content = document.getElementById(tab.dataset.tab);
+            if(content) content.classList.add("active");
+        });
+    });
+}
+
+/* ==========================================================
+   KLIKANIE MINI TIMEFRAME
+========================================================== */
+
+function setupMiniColumns(){
+    document.querySelectorAll(".mini-col").forEach(function(column){
+        column.addEventListener("click", function(){
+            updateUI(column.dataset.id, column.dataset.tf);
+        });
+    });
+}
+
+/* ==========================================================
+   PRZYCISKI ANALIZY
+========================================================== */
+
+function setupButtons(){
+    document.querySelectorAll(".analyze-button").forEach(function(button){
+        button.addEventListener("click", function(){
+            fetchData(button.dataset.symbol, button.dataset.id);
+        });
+    });
+}
+
+/* ==========================================================
+   START
+========================================================== */
+
+document.addEventListener("DOMContentLoaded", function(){
+    buildInterface();
+    setupTabs();
+    setupMiniColumns();
+    setupButtons();
+});
+</script>
+
+</body>
+</html>
